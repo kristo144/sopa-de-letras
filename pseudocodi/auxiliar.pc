@@ -1,0 +1,213 @@
+accion escribir_mensaje_bienvenida() es:
+Inicio
+	escribir ("******************************************************")
+	escribir ("Os damos la bienvenida al juego de la sopa de letras!")
+	escribir ("Autores: Diego Marquez, Clara Puig, Kristiyan Tonev")
+	escribir ("******************************************************")
+faccion
+
+funcion leer_palabras (nombre_fichero: cadena, VAR n_pal: entero) retorna puntero a palabra_t es:
+var
+	ret, pal: puntero a palabra_t
+	s: tabla[MAX_PALABRA + 1] de caracter
+fvar
+Inicio
+	abrir_archivo(nombre_fichero, lectura)
+	si (no abierto) entonces:
+		escribir("Error lectura archivo.")
+		ret := NULL
+		n_pal := 0
+	sino:
+		leer(s)
+		ret = nueva_palabra(s)
+		leer(s)
+		n_pal := 1
+		mientras (no fin de fichero) hacer:
+			pal = nueva_palabra(s)
+			insertar_palabra_en_lista(ret, pal)
+			n_pal := n_pal + 1
+			leer(s)
+		fmientras
+	fsi
+	retorna ret
+ffuncion
+
+funcion nueva_palabra(s: cadena) retorna puntero a palabra_t es:
+var
+	ret: puntero a palabra_t
+fvar
+Inicio
+	ret := calloc(1, sizeof(palabra_t))
+	si (ret != NULL) entonces:
+		ret->sig = NULL
+		ret->ant = NULL
+		strncpy(ret->letras, s, MAX_PALABRA + 1)
+	fsi
+	retorna ret
+ffuncion
+
+accion insertar_palabra_en_lista(primera: puntero a palabra_t, nueva: puntero a palabra_t) es:
+Inicio
+	mientras ((primera->sig != NULL) y (primera->sig->letras < nueva->letras)) hacer:
+		primera := primera->sig
+	fmientras
+	insertar_despues(primera, nueva)
+faccion
+
+accion insertar_despues(a: puntero a palabra_t, b: puntero a palabra_t) es:
+var
+	aux: puntero a palabra_t
+fvar
+Inicio
+	aux := a->sig
+	a->sig := b
+	b->sig := aux
+	b->ant := a
+	si (b->sig != NULL) entonces:
+		b->sig->ant := b
+	fsi
+faccion
+
+accion mostrar_palabras (p: puntero a palabra_t, n: entero) es:
+Inicio
+	escribir("Hay ", n, " palabras en total y son:")
+	mientras (p != NULL) hacer:
+		escribir(p->letras)
+		p := p->sig
+	fmientras
+faccion
+
+funcion pedir_tamano_sopa(min: entero, max: entero) retorna entero
+var
+	n: entero
+fvar
+Inicio
+	n := 0
+	escribir("Pon la dimension de la sopa entre ", min, " y ", max, ": ")
+	leer(n)
+	mientras (n < min o n > max) hacer:
+		escribir("Numero no valido")
+		escribir("Pon la dimension de la sopa entre ", min, " y ", max, ": ")
+		leer(n)
+	fmientras
+	retorna n
+ffuncion
+
+funcion generar_sopa(dim: entero, p: puntero a palabra_t) retorna puntero a sopa_t
+var
+	j: puntero a sopa_t
+fvar
+Inicio
+	j := calloc(1, sizeof(sopa_t))
+	si (j != NULL) entonces:
+		j->letras := calloc(dim * dim, sizeof(char))
+		j->aciertos := calloc(dim * dim, sizeof(bool))
+		si ((j->letras != NULL) y (j->aciertos != NULL)) entonces:
+			j->dim := dim
+			j->pal_0 := p
+			insertar_palabras(j)
+			rellenar_espacios_vacios(j)
+		sino:
+			free(j->letras)
+			free(j->aciertos)
+			free(j)
+			j := NULL
+		fsi
+	fsi
+	retorna j
+ffuncion
+
+accion insertar_palabras(j: puntero a sopa_t) es:
+var
+	p: puntero a palabra_t
+fvar
+Inicio
+	p := j->pal_0
+	mientras (p != NULL) hacer:
+		insertar_palabra(j, p)
+		j->n_palabras := j->n_palabras + 1
+		p := p->sig
+	fmientras
+faccion
+
+accion insertar_palabra(j: puntero a sopa_t, p: puntero a palabra_t) es:
+Inicio
+	hacer:
+		posicion_aleatoria(p, j->dim)
+	mientras (no comprobar_posicion_valida(j, p))
+	escribir_palabra(j, p)
+faccion
+
+accion posicion_aleatoria(p: puntero a palabra_t, dim: entero) es:
+const
+	dirs: {HOR_DIR, HOR_REV, VER_DIR, VER_REV}
+fconst
+var
+	num_dirs: entero
+	len: entero
+	min_x, max_x, min_y, max_y: enteros
+fvar
+Inicio
+	num_dirs := sizeof(dirs)/sizeof(int)
+	p->dir := dirs[ran_int(0, num_dirs - 1)]
+	len := strlen(p->letras)
+
+	$ off-by-one error? verificar
+	p->x_0 := ran_int(0 + len * (p->dir == HOR_REV), dim - len * (p->dir == HOR_DIR))
+	p->y_0 := ran_int(0 + len * (p->dir == VER_REV), dim - len * (p->dir == VER_DIR))
+faccion
+
+funcion ran_int(min: entero, max: entero) retorna int es:
+Inicio
+	retorna ((aleatorio() % (max - min)) + min)
+ffuncion
+
+funcion comprobar_posicion_valida(j: puntero a sopa_t, p: puntero a palabra_t) retorna booleano es:
+var
+	ret: booleano
+	i: entero
+fvar
+Inicio
+	ret := verdadero
+	i := 0
+	mientras (p->letras[i] != '\0' y ret) hacer:
+		ret := j->letras[buscar_casilla(j->dim, p, i)] == CAR_VACIO
+		i := i + 1
+	fmientras
+	retorna ret
+ffuncion
+
+funcion buscar_casilla(dim: entero, p: puntero a palabra_t, i: entero) retorna entero es:
+var
+	d_hor, d_ver: entero
+fvar
+Inicio
+	opcion(p->dir):
+		HOR_DIR:
+			d_hor := 1
+			d_ver := 0
+		HOR_REV:
+			d_hor := -1
+			d_ver := 0
+		VER_DIR:
+			d_hor := 0
+			d_ver := 1
+		VER_REV:
+			d_hor := 0
+			d_ver := -1
+	fopcion
+
+	retorna dim * (p->y_0 + d_ver) + (p->x_0 + d_hor)
+ffuncion
+
+accion escribir_palabra(j: puntero a sopa_t, p: puntero a palabra_t) es:
+var
+	i: entero
+fvar
+Inicio
+	i := 0
+	mientras (p->letras[i] != '\0') hacer:
+		j->letras[buscar_casilla(j->dim, p, i)] := p->letras[i]
+		i := i + 1
+	fmientras
+faccion
