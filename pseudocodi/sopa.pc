@@ -1,0 +1,72 @@
+Algoritmo sopa_de_letras es:
+const
+	MAX_PALABRA: 8
+	MIN_PALABRA: 4
+	MAX_NPAL: 10
+	
+	MIN_DIM: 10
+	MAX_DIM: 40
+
+	RENDICION: "RENDICIO"
+
+	HOR_DIR:  1
+	HOR_REV: -1
+	VER_DIR:  2
+	VER_REV: -2
+
+	CAR_VACIO: '\0'
+fconst
+tipo
+	sopa_t: registro
+		$ Es necesario guradar n_palabras y n_aciertos?
+		dim, n_palabras, n_aciertos: enteros
+		letras: puntero a caracter
+		aciertos: puntero a booleano
+		pal_0: puntero a palabra_t
+	fregistro
+	palabra_t: registro
+		letras: tabla[MAX_PALABRA + 1] de caracter
+		acertada: bool $ Necesario?
+		x_0, y_0, dir: enteros
+		sig, ant: punteros a palabra_t
+	fregistro
+ftipo
+var
+	j: puntero a sopa_t
+	p_0: puntero a palabra_t
+	juego_finalizado: booleano
+	rendido: booleano
+	n: entero
+	dim: entero
+fvar
+Inicio
+	escribir_mensaje_bienvenida()
+	p_0 := leer_palabras(nombre_fichero, n)
+
+	si (p_0 = NULL) entonces:
+		escribir("Error lectura palabras")
+	sino:
+		mostrar_palabras(p_0, n)
+		dim := pedir_tamano_sopa(MIN_DIM, MAX_DIM)
+		j := generar_sopa(dim, p_0)
+
+		si (j = NULL) entonces:
+			escribir("Error generacion tabla")
+			liberar_palabras(p_0)
+		sino:
+			hacer:
+				mostrar_sopa(j)
+				rendido := jugada_usuario(j)
+				juego_finalizado := rendido o (j->p_0 = NULL)
+			mientras (no juego_finalizado)
+
+			si (rendido) entonces:
+				mostrar_solucion(j)
+			sino:
+				escribir("Enhorabuena! Has ganado!")
+			fsi
+
+			liberar_memoria(j)
+		fsi
+	fsi
+falgoritmo

@@ -211,3 +211,110 @@ Inicio
 		i := i + 1
 	fmientras
 faccion
+
+funcion jugada_usuario(j: puntero a sopa_t) retorna booleano es:
+var
+	ret: booleano
+	input: cadena
+	intento, p: puntero a palabra_t
+fvar
+Inicio
+	escribir("Pon la palabra que has encontrado")
+	escribir("Pon ", RENDICION, " para ver solucion.")
+	leer(input) $ Aqui debe ser fgets para garantizar seguridad
+	si (input == RENDICION) entonces:
+		ret := verdadero
+	sino:
+		ret := falso
+		p := encontrar_palabra_lista(j->pal_0, input)
+
+		si (p == NULL) entonces:
+			escribir("Esta no es una de las palabras.")
+		sino:
+			intento := nueva_palabra(input) $Comprobacion errores?
+			pedir_coordenadas(intento)
+			si (comprobar_palabras_iguales(p, intento)) entonces:
+				marcar_encierto(j, p)
+			sino
+				escribir("No has acertado")
+			fsi
+		fsi
+		free(intento)
+	fsi
+	retorna ret
+ffuncion
+
+funcion encontrar_palabra_lista(p: puntero a palabra_t, s: cadena) retorna puntero a palabra_t es:
+Inicio
+	mientras (p != NULL y p->letras != s) hacer:
+		p = p->sig
+	fmientras
+	retorna p
+ffuncion
+
+accion pedir_coordenadas(p: puntero a palabra_t) es:
+Inicio
+	escribir("En que fila empieza la palabra?")
+	leer(p->x_0)
+	escribir("En que columna empieza la palabra?")
+	leer(p->y_0)
+	escribir("En que direccion esta escrita la palabra?")
+	$Poner aqui las posibilidades
+	leer(p->dir)
+faccion
+
+funcion comprobar_palabras_iguales(a: puntero a palabra_t, b: puntero a palabra_t) retorna booleano es:
+Inicio
+	retorna (a->x_0 == b->x_0) && (a->y_0 == b->y_0) && (a->dir == b->dir)
+ffuncion
+
+accion marcar_encierto(j: puntero a sopa_t, p: puntero a palabra_t) es:
+Inicio
+	p->acertada := verdadero $Necesario?
+	marcar_letras_encertadas(j, p)
+	eliminar_palabra_lista(j, p)
+faccion
+
+accion marcar_letras_encertadas(j: puntero a sopa_t, p: puntero a palabra_t) es:
+var
+	i: entero
+fvar
+Inicio
+	i := 0
+	mientras (p->letras[i] != '\0') hacer:
+		j->enc[buscar_casilla(j->dim, p, i)] := verdadero
+		i := i + 1
+	fmientras
+faccion
+
+accion eliminar_palabra_lista(j: puntero a sopa_t, p: puntero a palabra_t) es:
+Inicio
+	p->sig->ant := p->ant
+	si (p == j->p_0) entonces:
+		j->p_0 := p->sig
+	sino:
+		p->ant->sig := p->sig
+	fsi
+	free(p)
+faccion
+
+accion mostrar_solucion(j: puntero a sopa_t) es:
+Inicio
+	mientras (j->p_0 != NULL) hacer:
+		marcar_encierto(j, j->p_0)
+	fmientras
+	mostrar_sopa(j)
+faccion
+
+accion liberar_palabras(p: puntero a palabra_t) es:
+var
+	aux: puntero a palabra_t
+fvar
+Inicio
+	mientras (p->sig != NULL) hacer:
+		aux := p
+		p := p->sig
+		free(aux)
+	fmientras
+	free(p)
+faccion
