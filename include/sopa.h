@@ -16,18 +16,20 @@
 
 #define CAR_VACIO '\0'
 
-typedef struct {
+typedef struct palabra_t palabra_t;
+
+struct palabra_t {
 	char lletres[MAX_PALABRA + 1];
 	bool acertada;
 	int x_0, y_0, dir;
-	paraula_t *sig, *ant;
-} palabra_t;
+	palabra_t *sig, *ant;
+};
 
 typedef struct {
 	int dim, n_palabras, n_aciertos;
 	char *letras;
 	bool *aciertos;
-	paraula_t *pal_0;
+	palabra_t *pal_0;
 } sopa_t;
 
 /*
