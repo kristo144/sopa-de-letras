@@ -212,6 +212,17 @@ Inicio
 	fmientras
 faccion
 
+accion rellenar_espacios_vacios(j: puntero a sopa_t) es:
+var
+	i, n: entero
+fvar
+Inicio
+	n := j->dim * j->dim
+	for(i := 0; i < n; i++)
+		if (j->letras[i] == CAR_VACIO)
+			j->letras[i] := ran_int('A', 'Z');
+faccion
+
 funcion jugada_usuario(j: puntero a sopa_t) retorna booleano es:
 var
 	ret: booleano
@@ -234,7 +245,7 @@ Inicio
 			intento := nueva_palabra(input) $Comprobacion errores?
 			pedir_coordenadas(intento)
 			si (comprobar_palabras_iguales(p, intento)) entonces:
-				marcar_encierto(j, p)
+				marcar_acierto(j, p)
 			sino
 				escribir("No has acertado")
 			fsi
@@ -268,21 +279,21 @@ Inicio
 	retorna (a->x_0 == b->x_0) && (a->y_0 == b->y_0) && (a->dir == b->dir)
 ffuncion
 
-accion marcar_encierto(j: puntero a sopa_t, p: puntero a palabra_t) es:
+accion marcar_acierto(j: puntero a sopa_t, p: puntero a palabra_t) es:
 Inicio
 	p->acertada := verdadero $Necesario?
-	marcar_letras_encertadas(j, p)
+	marcar_letras_acertadas(j, p)
 	eliminar_palabra_lista(j, p)
 faccion
 
-accion marcar_letras_encertadas(j: puntero a sopa_t, p: puntero a palabra_t) es:
+accion marcar_letras_acertadas(j: puntero a sopa_t, p: puntero a palabra_t) es:
 var
 	i: entero
 fvar
 Inicio
 	i := 0
 	mientras (p->letras[i] != '\0') hacer:
-		j->enc[buscar_casilla(j->dim, p, i)] := verdadero
+		j->aciertos[buscar_casilla(j->dim, p, i)] := verdadero
 		i := i + 1
 	fmientras
 faccion
@@ -301,7 +312,7 @@ faccion
 accion mostrar_solucion(j: puntero a sopa_t) es:
 Inicio
 	mientras (j->p_0 != NULL) hacer:
-		marcar_encierto(j, j->p_0)
+		marcar_acierto(j, j->p_0)
 	fmientras
 	mostrar_sopa(j)
 faccion
@@ -311,10 +322,19 @@ var
 	aux: puntero a palabra_t
 fvar
 Inicio
-	mientras (p->sig != NULL) hacer:
-		aux := p
-		p := p->sig
-		free(aux)
+	mientras (p != NULL) hacer:
+		aux := p->sig
+		free(p)
+		p = aux
 	fmientras
-	free(p)
+faccion
+
+accion liberar_memoria(j: puntero a sopa_t) es:
+Inicio
+	si (j != NULL) entonces:
+		liberar_palabras(j->p_0)
+		free(j->letras)
+		free(j->aciertos)
+		free(j)
+	fsi
 faccion

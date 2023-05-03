@@ -194,19 +194,19 @@ void pedir_coordenadas(palabra_t *p);
 bool comprobar_palabras_iguales(palabra_t *a, palabra_t *b);
 
 /*
-   Marcar palabra como encertada en una sopa.
+   Marcar palabra como acertada en una sopa.
    Elimina la palabra de su lista y libra su memoria.
    @param j (Ref (E): sopa_t). La sopa.
    @param p (Ref (E): palabra_t). La palabra.
 */
-void marcar_encierto(sopa_t *j, palabra_t *p);
+void marcar_acierto(sopa_t *j, palabra_t *p);
 
 /*
-   Marcar las letras de una palabra como encertada.
+   Marcar las letras de una palabra como acertada.
    @param j (Ref (E): sopa_t). La sopa.
    @param p (Ref (E): palabra_t). La palabra.
 */
-void marcar_letras_encertadas(sopa_t *j, palabra_t *p);
+void marcar_letras_acertadas(sopa_t *j, palabra_t *p);
 
 /*
    Eliminar una palabra de una lista y liberar su memoria.
@@ -222,7 +222,8 @@ void eliminar_palabra_lista(sopa_t *j, palabra_t *p);
 void mostrar_solucion(sopa_t *j);
 
 /*
-   Eliminar una lista de palabras entera y liberar su memoria
+   Eliminar una lista de palabras entera y liberar su memoria.
+   Si la lista es NULL, no hace nada.
    @param p (Ref (E): palabra_t). La lista de palabras.
 */
 void liberar_palabras(palabra_t *p);
@@ -232,3 +233,15 @@ void liberar_palabras(palabra_t *p);
    @param j (Ref (E): sopa_t). La sopa.
 */
 void mostrar_sopa(sopa_t *j);
+
+/*
+   Mostrar mensaje de enhorabuena al jugador.
+*/
+void felicitar_jugador();
+
+/*
+   Liberar memoria de una sopa. Si la sopa es NULL, no hace nada.
+   @param j (Ref (E): sopa_t). La sopa.
+*/
+void liberar_memoria(sopa_t *j);
+
