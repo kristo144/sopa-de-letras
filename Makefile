@@ -4,7 +4,7 @@ LDFLAGS := ""
 CC := cc
 LD := ld
 
-sopa: source/main.c include/sopa.h
+sopa: source/main.c source/sopa.c include/sopa.h
 	$(CC) $(CCFLAGS) -o sopa source/main.c source/sopa.c
 
 clean:

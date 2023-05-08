@@ -19,6 +19,11 @@
 #define TOSTR_AUX(x) #x
 #define TOSTR(x) TOSTR_AUX(x)
 
+#define COLOR_SET(x)		printf("\033[" #x "m")
+#define COLOR_FG_ROJO()		COLOR_SET(0;31)
+#define COLOR_BG_VERDE()	COLOR_SET(0;42)
+#define COLOR_DEFAULT()		COLOR_SET(0)
+
 typedef struct palabra_t palabra_t;
 
 struct palabra_t {
