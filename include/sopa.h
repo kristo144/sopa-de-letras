@@ -16,10 +16,13 @@
 
 #define CAR_VACIO '\0'
 
+#define TOSTR_AUX(x) #x
+#define TOSTR(x) TOSTR_AUX(x)
+
 typedef struct palabra_t palabra_t;
 
 struct palabra_t {
-	char lletres[MAX_PALABRA + 1];
+	char letras[MAX_PALABRA + 1];
 	bool acertada;
 	int x_0, y_0, dir;
 	palabra_t *sig, *ant;
@@ -172,13 +175,19 @@ void rellenar_espacios_vacios(sopa_t *j);
 bool jugada_usuario(sopa_t *j);
 
 /*
+   Leer cadena de stdin, maximo MAX_PALABRA + nulo. Limpia stdin.
+   @param s (Ref (E): tabla[] de caracter). Cadena donde almacenar los caracteres leidos.
+*/
+void leer_string(char *s);
+
+/*
    Buscar una palabra en una lista de palabra_t.
    @param p (Ref (E): palabra_t). Lista de palabras.
    @param s (Ref (E): tabla[] de caracter). Palabra buscada
    @return Puntero al primer elemento en que coincide la palabra.
    Si no se encuentra la palabra, retorna NULL
 */
-palabra_t *encontrar_palabra_lista(palabra_t p, char *s);
+palabra_t *encontrar_palabra_lista(palabra_t *p, char *s);
 
 /*
    Pedir coordenadas y direccion de la palabra encontrada por teclado.

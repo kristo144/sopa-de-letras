@@ -1,7 +1,15 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "sopa.h"
+
 void escribir_mensaje_bienvenida() {
 }
 
 palabra_t *leer_palabras(char *nombre_fichero, int *n_pal) {
+	palabra_t *ret;
+	return ret;
 }
 
 palabra_t *nueva_palabra(char *s) {
@@ -19,7 +27,7 @@ palabra_t *nueva_palabra(char *s) {
 void insertar_palabra_en_lista(palabra_t *primera, palabra_t *nueva) {
 	/* Encuentra la ultima palabra en la lista que es menor que la nueva. */
 	while ((primera->sig != NULL) &&
-			(strcmp(primera->sig->letras, nueva->letras < 0)))
+			(strcmp(primera->sig->letras, nueva->letras) < 0))
 		primera = primera->sig;
 	insertar_despues(primera, nueva);
 }
@@ -39,9 +47,12 @@ void mostrar_palabras (palabra_t *p, int n) {
 }
 
 int pedir_tamano_sopa(int min, int max) {
+	return 0;
 }
 
 sopa_t *generar_sopa(int dim, palabra_t *p) {
+	sopa_t *j;
+	return j;
 }
 
 void insertar_palabras(sopa_t *j) {
@@ -57,9 +68,11 @@ int ran_int(int min, int max) {
 }
 
 bool comprobar_posicion_valida(sopa_t *j, palabra_t *p) {
+	return false;
 }
 
 int buscar_casilla(int dim, palabra_t *p, int i) {
+	return 0;
 }
 
 void escribir_palabra(sopa_t *j, palabra_t *p) {
@@ -81,7 +94,7 @@ bool jugada_usuario(sopa_t *j) {
 
 	printf("Pon la palabra que has encontrado,\n"
 			"o pon " RENDICION " para ver la solucion:");
-	scanf("%" #MAX_PALABRA "s", input);
+	leer_string(input);
 
 	if (!strcmp(input, RENDICION)) {
 		ret = true;
@@ -111,7 +124,13 @@ bool jugada_usuario(sopa_t *j) {
 	return ret;
 }
 
-palabra_t *encontrar_palabra_lista(palabra_t p, char *s) {
+void leer_string(char *s) {
+	scanf("%" TOSTR(MAX_PALABRA) "s", s);
+	limpiar_stdin();
+}
+
+palabra_t *encontrar_palabra_lista(palabra_t *p, char *s) {
+	return p;
 }
 
 void pedir_coordenadas(palabra_t *p) {
@@ -149,6 +168,7 @@ void limpiar_stdin() {
 }
 
 bool comprobar_palabras_iguales(palabra_t *a, palabra_t *b) {
+	return true;
 }
 
 void marcar_acierto(sopa_t *j, palabra_t *p) {
@@ -168,8 +188,8 @@ void eliminar_palabra_lista(sopa_t *j, palabra_t *p) {
 }
 
 void mostrar_solucion(sopa_t *j) {
-	while (j->p_0 != NULL) {
-		marcar_acierto(j, j->p_0);
+	while (j->pal_0 != NULL) {
+		marcar_acierto(j, j->pal_0);
 	}
 	mostrar_sopa(j);
 }
