@@ -188,6 +188,22 @@ palabra_t *encontrar_palabra_lista(palabra_t p, char *s);
 void pedir_coordenadas(palabra_t *p);
 
 /*
+   Mostrar direcciones posibles y que numero corresponde a cada direccion.
+*/
+void mostrar_direcciones();
+
+/*
+   Leer numero entero de stdin y limpiar stdin.
+   @return El numero leido.
+*/
+int leer_numero();
+
+/*
+   Descartar caracteres de stdin hasta el siguiente '\n'
+*/
+void limpiar_stdin();
+
+/*
    Comprobar si dos palabra_t tienen coordenadas y direccion identicas.
    @param a (Ref (E): palabra_t). Una de las palabras.
    @param b (Ref (E): palabra_t). La otra palabra.
