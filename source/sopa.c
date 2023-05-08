@@ -5,12 +5,39 @@
 #include "sopa.h"
 
 void escribir_mensaje_bienvenida() {
+	printf(
+			"****************************************************"
+			"Bienvenido al juego SOPA DE LETRAS!"
+			"Autores: Diego Marquez, Clara Puig, Kristiyan Tonev"
+			"****************************************************"
+			);
+	return;
 }
 
 palabra_t *leer_palabras(char *nombre_fichero, int *n_pal) {
-	nombre_fichero = nombre_fichero;
-	n_pal = n_pal;
-	return NULL;
+	palabra_t *ret, *pal;
+	FILE *f;
+	char s[MAX_PALABRA + 1];
+
+	f = fopen(nombre_fichero, "r");
+	if (f == NULL) {
+		printf ("Error de lectura");
+		ret = NULL;
+		*n_pal = 0;
+	}
+	else {
+		fscanf(f, "%" TOSTR(MAX_PALABRA) "s", s);
+		ret = nueva_palabra(s);
+		*n_pal = 1;
+		fscanf(f, "%" TOSTR(MAX_PALABRA) "s", s);
+		while (!feof(f)) {
+			pal = nueva_palabra(s);
+			insertar_palabra_en_lista(ret, pal);
+			*n_pal = *n_pal + 1;
+			fscanf(f, "%" TOSTR(MAX_PALABRA) "s", s);
+		}
+	}
+	return ret;
 }
 
 palabra_t *nueva_palabra(char *s) {
@@ -31,6 +58,7 @@ void insertar_palabra_en_lista(palabra_t *primera, palabra_t *nueva) {
 			(strcmp(primera->sig->letras, nueva->letras) < 0))
 		primera = primera->sig;
 	insertar_despues(primera, nueva);
+	return;
 }
 
 void insertar_despues(palabra_t *a, palabra_t *b) {
@@ -45,53 +73,116 @@ void insertar_despues(palabra_t *a, palabra_t *b) {
 }
 
 void mostrar_palabras (palabra_t *p, int n) {
-	p = p;
-	n = n;
+	printf("Quedan %d palabras:\n", n);
+	while (p != NULL) {
+		puts(p->letras);
+		p = p->sig;
+	}
+	return;
 }
 
 int pedir_tamano_sopa(int min, int max) {
-	min = min;
-	max = max;
-	return 0;
+	int n = 0;
+
+	printf("Pon la dimension de la sopa entre %d y %d: ", min, max);
+	n = leer_numero();
+
+	while (n < min || n > max) {
+		printf("Numero no valido.");
+		printf("Pon la dimension de la sopa entre %d y %d: ", min, max);
+		n = leer_numero();
+	}
+	return n;
 }
 
 sopa_t *generar_sopa(int dim, palabra_t *p) {
-	dim = dim;
-	p = p;
-	return NULL;
+	sopa_t *j = calloc(1, sizeof (sopa_t));
+	if (j != NULL) {
+		j->letras = calloc(dim * dim, sizeof (char));
+		j->aciertos = calloc(dim * dim, sizeof (bool));
+
+		if (j->letras != NULL && j->aciertos != NULL) {
+			j->dim = dim;
+			j->pal_0 = p;
+			insertar_palabras(j);
+			rellenar_espacios_vacios(j);
+		}
+		else {
+			liberar_memoria(j);
+			j = NULL;
+		}
+	}
+
+	return j;
 }
 
 void insertar_palabras(sopa_t *j) {
-	j = j;
+	palabra_t *p = j->pal_0;
+	while (p != NULL) {
+		insertar_palabra(j, p);
+		j->n_palabras = j->n_palabras + 1;
+		p = p->sig;
+	}
+	return;
 }
 
 void insertar_palabra(sopa_t *j, palabra_t *p) {
-	j = j;
-	p = p;
+	do {
+		posicion_aleatoria(p, j->dim);
+	} while (!comprobar_posicion_valida(j, p));
+	escribir_palabra(j, p);
+	return;
 }
 
 void posicion_aleatoria(palabra_t *p, int dim) {
-	p = p;
-	dim = dim;
+	int dirs[] = {HOR_DIR, HOR_REV, VER_DIR, VER_REV};
+	int len, num_dirs;
+
+	num_dirs = sizeof(dirs) / sizeof(int);
+	p->dir = dirs[ran_int(0, num_dirs - 1)];
+	len = strlen(p->letras);
+	
+	p->x_0 = ran_int(0 + len * (p->dir == HOR_REV), dim - len * (p->dir == HOR_DIR));
+	p->y_0 = ran_int(0 + len * (p->dir == VER_REV), dim - len * (p->dir == VER_DIR));
+	return;
 }
 
 int ran_int(int min, int max) {
-	min = min;
-	max = max;
-	return 0;
+	return ((rand() % (max - min + 1)) + min);
 }
 
 bool comprobar_posicion_valida(sopa_t *j, palabra_t *p) {
-	j = j;
-	p = p;
-	return false;
+	bool ret = true;
+	int i = 0;
+	while (p->letras[i] != '\0' && ret) {
+		ret = j->letras[buscar_casilla(j->dim, p, i)] == CAR_VACIO;
+		i++;
+	}
+	return ret;
 }
 
 int buscar_casilla(int dim, palabra_t *p, int i) {
-	dim = dim;
-	p = p;
-	i = i;
-	return 0;
+	int d_hor, d_ver;
+	switch (p->dir) {
+		case HOR_DIR:
+			d_hor = 1;
+			d_ver = 0;
+			break;
+		case HOR_REV:
+			d_hor = -1;
+			d_ver = 0;
+			break;
+		case VER_DIR:
+			d_hor = 0;
+			d_ver = 1;
+			break;
+		case VER_REV:
+			d_hor = 0;
+			d_ver = -1;
+			break;
+	}
+
+	return dim * (p->y_0 + i * d_ver) + (p->x_0 + i * d_hor);
 }
 
 void escribir_palabra(sopa_t *j, palabra_t *p) {
@@ -101,10 +192,17 @@ void escribir_palabra(sopa_t *j, palabra_t *p) {
 		j->letras[buscar_casilla(j->dim, p, i)] = p->letras[i];
 		i++;
 	}
+	return;
 }
 
 void rellenar_espacios_vacios(sopa_t *j) {
-	j = j;
+	int i, n;
+	n = j->dim * j->dim;
+	for (i = 0; i < n; i++)
+		if (j->letras[i] == CAR_VACIO)
+			/*j->letras[i] = ran_int('A', 'Z');*/
+			j->letras[i] = '.';
+	return;
 }
 
 bool jugada_usuario(sopa_t *j) {
@@ -133,8 +231,10 @@ bool jugada_usuario(sopa_t *j) {
 			}
 			else {
 				pedir_coordenadas(intento);
-				if (comprobar_palabras_iguales(p, intento))
+				if (comprobar_palabras_iguales(p, intento)) {
 					marcar_acierto(j, p);
+					j->n_aciertos++;
+				}
 				else
 					printf("No has acertado.");
 			}
@@ -147,22 +247,24 @@ bool jugada_usuario(sopa_t *j) {
 void leer_string(char *s) {
 	scanf("%" TOSTR(MAX_PALABRA) "s", s);
 	limpiar_stdin();
+	return;
 }
 
 palabra_t *encontrar_palabra_lista(palabra_t *p, char *s) {
-	p = p;
-	s = s;
-	return NULL;
+	while (p != NULL && strcmp(p->letras, s) != 0)
+		p = p->sig;
+	return p;
 }
 
 void pedir_coordenadas(palabra_t *p) {
 	printf("En que fila empieza la palabra? ");
-	p->x_0 = leer_numero();
+	p->y_0 = leer_numero() - 1;
 	printf("En que columna empieza la palabra? ");
-	p->y_0 = leer_numero();
+	p->x_0 = leer_numero() - 1;
 	printf("En que direccion esta escrita la palabra?\n");
 	mostrar_direcciones();
 	p->dir = leer_numero();
+	return;
 }
 
 void mostrar_direcciones() {
@@ -190,19 +292,22 @@ void limpiar_stdin() {
 }
 
 bool comprobar_palabras_iguales(palabra_t *a, palabra_t *b) {
-	a = a;
-	b = b;
-	return true;
+	return (a->x_0 == b->x_0) && (a->y_0 == b->y_0) && (a->dir == b->dir);
 }
 
 void marcar_acierto(sopa_t *j, palabra_t *p) {
-	j = j;
-	p = p;
+	marcar_letras_acertadas(j, p);
+	eliminar_palabra_lista(j, p);
+	return;
 }
 
 void marcar_letras_acertadas(sopa_t *j, palabra_t *p) {
-	j = j;
-	p = p;
+	int i = 0;
+	while (p->letras[i] != '\0') {
+		j->aciertos[buscar_casilla(j->dim, p, i)] = true;
+		i++;
+	}
+	return;
 }
 
 void eliminar_palabra_lista(sopa_t *j, palabra_t *p) {
@@ -220,10 +325,17 @@ void mostrar_solucion(sopa_t *j) {
 		marcar_acierto(j, j->pal_0);
 	}
 	mostrar_sopa(j);
+	return;
 }
 
 void liberar_palabras(palabra_t *p) {
-	p = p;
+	palabra_t *aux;
+	while (p != NULL) {
+		aux = p->sig;
+		free(p);
+		p = aux;
+	}
+	return;
 }
 
 void mostrar_sopa(sopa_t *j) {
@@ -276,11 +388,12 @@ void mostrar_sopa(sopa_t *j) {
 	printf("\n");
 
 	printf("Llevas %d aciertos.\n", j->n_aciertos);
-	mostrar_palabras(j->pal_0, j->n_palabras);
+	mostrar_palabras(j->pal_0, j->n_palabras - j->n_aciertos);
 }
 
 void felicitar_jugador() {
 	printf("Enhorabuena! Has acertado todas las palabras!\n");
+	return;
 }
 
 void liberar_memoria(sopa_t *j) {
