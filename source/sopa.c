@@ -169,10 +169,12 @@ int ran_int(int min, int max) {
 }
 
 bool comprobar_posicion_valida(sopa_t *j, palabra_t *p) {
+	char c;
 	bool ret = true;
 	int i = 0;
 	while (p->letras[i] != '\0' && ret) {
-		ret = j->letras[buscar_casilla(j->dim, p, i)] == CAR_VACIO;
+		c = j->letras[buscar_casilla(j->dim, p, i)];
+		ret = (c == CAR_VACIO) || (c == p->letras[i] );
 		i++;
 	}
 	return ret;
