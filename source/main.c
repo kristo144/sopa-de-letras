@@ -10,37 +10,41 @@ int main (int argc, char *argv[]) {
 	bool juego_finalizado, rendido;
 	int n, dim;
 
-	argc = argc; /* evitar warning */
-	srand(time(NULL));
-
-	escribir_mensaje_bienvenida();
-	pal_0 = leer_palabras(argv[1], &n);
-
-	if (pal_0 == NULL) {
-		printf("Error lectura palabras.\n");
+	if (argc < 2) {
+		printf("Pon el fichero con palabras como primer parametro.\n");
 	}
 	else {
-		mostrar_palabras(pal_0, n);
-		dim = pedir_tamano_sopa(MIN_DIM, MAX_DIM);
-		j = generar_sopa(dim, pal_0);
+		srand(time(NULL));
 
-		if (j == NULL) {
-			printf("Error generacion tabla.\n");
-			liberar_palabras(pal_0);
+		escribir_mensaje_bienvenida();
+		pal_0 = leer_palabras(argv[1], &n);
+
+		if (pal_0 == NULL) {
+			printf("Error lectura palabras.\n");
 		}
 		else {
-			do {
-				mostrar_sopa(j);
-				rendido = jugada_usuario(j);
-				juego_finalizado = rendido || (j->pal_0 == NULL);
-			} while (!juego_finalizado);
+			mostrar_palabras(pal_0, n);
+			dim = pedir_tamano_sopa(MIN_DIM, MAX_DIM);
+			j = generar_sopa(dim, pal_0);
 
-			if (rendido)
-				mostrar_solucion(j);
-			else
-				felicitar_jugador();
+			if (j == NULL) {
+				printf("Error generacion tabla.\n");
+				liberar_palabras(pal_0);
+			}
+			else {
+				do {
+					mostrar_sopa(j);
+					rendido = jugada_usuario(j);
+					juego_finalizado = rendido || (j->pal_0 == NULL);
+				} while (!juego_finalizado);
 
-			liberar_memoria(j);
+				if (rendido)
+					mostrar_solucion(j);
+				else
+					felicitar_jugador();
+
+				liberar_memoria(j);
+			}
 		}
 	}
 

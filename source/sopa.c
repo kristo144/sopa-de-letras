@@ -6,10 +6,10 @@
 
 void escribir_mensaje_bienvenida() {
 	printf(
-			"****************************************************"
-			"Bienvenido al juego SOPA DE LETRAS!"
-			"Autores: Diego Marquez, Clara Puig, Kristiyan Tonev"
-			"****************************************************"
+			"****************************************************\n"
+			"Bienvenido al juego SOPA DE LETRAS!\n"
+			"Autores: Diego Marquez, Clara Puig, Kristiyan Tonev\n"
+			"****************************************************\n"
 			);
 	return;
 }
@@ -21,7 +21,6 @@ palabra_t *leer_palabras(char *nombre_fichero, int *n_pal) {
 
 	f = fopen(nombre_fichero, "r");
 	if (f == NULL) {
-		printf ("Error de lectura");
 		ret = NULL;
 		*n_pal = 0;
 	}
@@ -32,7 +31,7 @@ palabra_t *leer_palabras(char *nombre_fichero, int *n_pal) {
 		fscanf(f, "%" TOSTR(MAX_PALABRA) "s", s);
 		while (!feof(f)) {
 			pal = nueva_palabra(s);
-			insertar_palabra_en_lista(ret, pal);
+			ret = insertar_palabra_en_lista(ret, pal);
 			*n_pal = *n_pal + 1;
 			fscanf(f, "%" TOSTR(MAX_PALABRA) "s", s);
 		}
@@ -52,27 +51,38 @@ palabra_t *nueva_palabra(char *s) {
 	return ret;
 }
 
-void insertar_palabra_en_lista(palabra_t *primera, palabra_t *nueva) {
-	/* Encuentra la ultima palabra en la lista que es menor que la nueva. */
-	while ((primera->sig != NULL) &&
-			(strcmp(primera->sig->letras, nueva->letras) < 0))
-		primera = primera->sig;
-	insertar_despues(primera, nueva);
-	return;
+palabra_t *insertar_palabra_en_lista(palabra_t *primera, palabra_t *nueva) {
+	palabra_t *ret;
+
+	/* Si debe ser la primera: */
+	if (strcmp(primera->letras, nueva->letras) > 0) {
+		insertar_despues(nueva, primera);
+		ret = nueva;
+	}
+	else {
+		ret = primera;
+		/* Encuentra la ultima palabra en la lista que es menor que la nueva. */
+		while ((primera->sig != NULL) &&
+				(strcmp(primera->sig->letras, nueva->letras) < 0))
+			primera = primera->sig;
+		insertar_despues(primera, nueva);
+	}
+	return ret;
 }
 
 void insertar_despues(palabra_t *a, palabra_t *b) {
 	palabra_t *aux;
 	aux = a->sig;
 	a->sig = b;
-	b->sig = aux;
+	if (aux != NULL)
+		b->sig = aux;
 	b->ant = a;
 	if (b->sig != NULL)
 		b->sig->ant = b;
 	return;
 }
 
-void mostrar_palabras (palabra_t *p, int n) {
+void mostrar_palabras(palabra_t *p, int n) {
 	printf("Quedan %d palabras:\n", n);
 	while (p != NULL) {
 		puts(p->letras);
@@ -88,18 +98,17 @@ int pedir_tamano_sopa(int min, int max) {
 	n = leer_numero();
 
 	while (n < min || n > max) {
-		printf("Numero no valido.");
-		printf("Pon la dimension de la sopa entre %d y %d: ", min, max);
+		printf("Numero no valido. Pon la dimension de la sopa entre %d y %d: ", min, max);
 		n = leer_numero();
 	}
 	return n;
 }
 
 sopa_t *generar_sopa(int dim, palabra_t *p) {
-	sopa_t *j = calloc(1, sizeof (sopa_t));
+	sopa_t *j = calloc(1, sizeof(sopa_t));
 	if (j != NULL) {
-		j->letras = calloc(dim * dim, sizeof (char));
-		j->aciertos = calloc(dim * dim, sizeof (bool));
+		j->letras = calloc(dim * dim, sizeof(char));
+		j->aciertos = calloc(dim * dim, sizeof(bool));
 
 		if (j->letras != NULL && j->aciertos != NULL) {
 			j->dim = dim;
@@ -200,8 +209,8 @@ void rellenar_espacios_vacios(sopa_t *j) {
 	n = j->dim * j->dim;
 	for (i = 0; i < n; i++)
 		if (j->letras[i] == CAR_VACIO)
-			/*j->letras[i] = ran_int('A', 'Z');*/
-			j->letras[i] = '.';
+			j->letras[i] = ran_int('A', 'Z');
+			/*j->letras[i] = '.';*/
 	return;
 }
 
@@ -211,7 +220,7 @@ bool jugada_usuario(sopa_t *j) {
 	palabra_t *intento, *p;
 
 	printf("Pon la palabra que has encontrado,\n"
-			"o pon " RENDICION " para ver la solucion:");
+			"o pon " RENDICION " para ver la solucion: ");
 	leer_string(input);
 
 	if (!strcmp(input, RENDICION)) {
@@ -311,7 +320,9 @@ void marcar_letras_acertadas(sopa_t *j, palabra_t *p) {
 }
 
 void eliminar_palabra_lista(sopa_t *j, palabra_t *p) {
-	p->sig->ant = p->ant;
+	if (p->sig != NULL)
+		p->sig->ant = p->ant;
+
 	if (p == j->pal_0)
 		j->pal_0 = p->sig;
 	else
@@ -344,51 +355,43 @@ void mostrar_sopa(sopa_t *j) {
 
 	/* Mostrar numeros de columna */
 	COLOR_FG_ROJO();
-	printf("\033[0;31m");   /* Color */
-	printf("  ");
+	printf("\n\n  ");
+	/* Decenas */
 	for (i = 10; i < j->dim + 1; i+=10) {
-		for (k=0; k < 18; k++)
-			printf(" ");
-		printf(" %d", i/10);
+		printf("                   %d", i/10);
 	}
 
+	/* Unidades */
 	printf("\n  ");   
-	for (i = 0; i < j->dim; i++) {   
+	for (i = 0; i < j->dim; i++)
 		printf(" %d", (i + 1) % 10);
-		/*
-		int p = (i % 10) + 1;
-		p != 10 ? printf(" %d", p) : printf(" 0");
-		*/
-	}
 
 	printf("\n");
-	printf("\033[0m");  /* Volver al color por defecto */
+	COLOR_DEFAULT();
 
 
 	/* Mostrar letras. Cada letra ocupa dos espacios: */
 	/* Si esta encertada, se marca */
 	for (i = 0; i < j->dim ; i++)
 	{
-		printf("\033[0;31m");	/* Color  */
+		COLOR_FG_ROJO();
 		printf("%-2d", i + 1);	/* Mostrar numero de linia */
-		printf("\033[0m");	/* Tornem al color per defecte */
+		COLOR_DEFAULT();
 
 		for (k = 0; k < j->dim; k++) {
-			if (j->aciertos[i * j->dim + k]) {
-				printf("\033[0;42m");   /* Color verd de fons */
-				printf(" %c", j->letras[i * j->dim + k]);
-				printf("\033[0m");  /* Tornem al color per defecte */
-			}
-			else {
-				printf(" %c", j->letras[i * j->dim + k]);
-			}
+			if (j->aciertos[i * j->dim + k])
+				COLOR_BG_VERDE();
+			printf(" %c", j->letras[i * j->dim + k]);
+			COLOR_DEFAULT();
 		}
 		printf("\n");
 	}
 	printf("\n");
 
-	printf("Llevas %d aciertos.\n", j->n_aciertos);
-	mostrar_palabras(j->pal_0, j->n_palabras - j->n_aciertos);
+	if (j->pal_0 != NULL) {
+		printf("Llevas %d aciertos.\n", j->n_aciertos);
+		mostrar_palabras(j->pal_0, j->n_palabras - j->n_aciertos);
+	}
 }
 
 void felicitar_jugador() {

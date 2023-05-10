@@ -70,8 +70,9 @@ palabra_t *nueva_palabra(char *s);
    Dada una lista de palabra_t, insertar un elemento nuevo en orden alfabetico.
    @param primera (Ref (E): palabra_t). Primer elemento de la lista.
    @param nueva (Ref (E): palabra_t). Elemento a insertar.
+   @return Direccion del primer elemento de la lista.
 */
-void insertar_palabra_en_lista(palabra_t *primera, palabra_t *nueva);
+palabra_t *insertar_palabra_en_lista(palabra_t *primera, palabra_t *nueva);
 
 /*
    Inserta el elemento b después del elemento a en una lista de palabra_t.
