@@ -25,9 +25,13 @@ palabra_t *leer_palabras(char *nombre_fichero, int *n_pal) {
 		*n_pal = 0;
 	}
 	else {
+		/* No se hace comprobacion de input, tal y como indica el enunciado. */
+		/* Leer primera palabra. */
 		fscanf(f, "%" TOSTR(MAX_PALABRA) "s", s);
 		ret = nueva_palabra(s);
 		*n_pal = 1;
+
+		/* Leer resto de palabras */
 		fscanf(f, "%" TOSTR(MAX_PALABRA) "s", s);
 		while (!feof(f)) {
 			pal = nueva_palabra(s);
@@ -54,7 +58,7 @@ palabra_t *nueva_palabra(char *s) {
 palabra_t *insertar_palabra_en_lista(palabra_t *primera, palabra_t *nueva) {
 	palabra_t *ret;
 
-	/* Si debe ser la primera: */
+	/* Si la nueva va antes que la primera: */
 	if (strcmp(primera->letras, nueva->letras) > 0) {
 		insertar_despues(nueva, primera);
 		ret = nueva;
@@ -72,9 +76,10 @@ palabra_t *insertar_palabra_en_lista(palabra_t *primera, palabra_t *nueva) {
 
 void insertar_despues(palabra_t *a, palabra_t *b) {
 	palabra_t *aux;
+
 	aux = a->sig;
 	a->sig = b;
-	if (aux != NULL)
+	if (aux != NULL) /* Comprobacion !NULL para el caso que a es la nueva y b es la lista */
 		b->sig = aux;
 	b->ant = a;
 	if (b->sig != NULL)
@@ -144,15 +149,18 @@ void insertar_palabra(sopa_t *j, palabra_t *p) {
 }
 
 void posicion_aleatoria(palabra_t *p, int dim) {
+	/* Lista de direcciones */
 	int dirs[] = {HOR_DIR, HOR_REV, VER_DIR, VER_REV};
 	int len, num_dirs;
 
+	/* Calcular el numero de direcciones posibles. Elegir una aleatoria. */
 	num_dirs = sizeof(dirs) / sizeof(int);
 	p->dir = dirs[ran_int(0, num_dirs - 1)];
 	len = strlen(p->letras);
 	
-	p->x_0 = ran_int(0 + len * (p->dir == HOR_REV), dim - len * (p->dir == HOR_DIR));
-	p->y_0 = ran_int(0 + len * (p->dir == VER_REV), dim - len * (p->dir == VER_DIR));
+	/* Restringimos los valores x_0 y y_0 posibles en funcion de la direccion de la palabra */
+	p->x_0 = ran_int(0 + len * (p->dir == HOR_REV), (dim - 1) - len * (p->dir == HOR_DIR));
+	p->y_0 = ran_int(0 + len * (p->dir == VER_REV), (dim - 1) - len * (p->dir == VER_DIR));
 	return;
 }
 
@@ -172,6 +180,8 @@ bool comprobar_posicion_valida(sopa_t *j, palabra_t *p) {
 
 int buscar_casilla(int dim, palabra_t *p, int i) {
 	int d_hor, d_ver;
+
+	/* Calcular desplazamientos a partir de direccion */
 	switch (p->dir) {
 		case HOR_DIR:
 			d_hor = 1;
@@ -210,7 +220,6 @@ void rellenar_espacios_vacios(sopa_t *j) {
 	for (i = 0; i < n; i++)
 		if (j->letras[i] == CAR_VACIO)
 			j->letras[i] = ran_int('A', 'Z');
-			/*j->letras[i] = '.';*/
 	return;
 }
 
@@ -231,7 +240,9 @@ bool jugada_usuario(sopa_t *j) {
 		p = encontrar_palabra_lista(j->pal_0, input);
 
 		if (p == NULL) {
-			printf("La palabra no esta en la lista.");
+			COLOR_FG_ROJO();
+			printf("La palabra no esta en la lista.\n");
+			COLOR_DEFAULT();
 		}
 		else {
 			intento = nueva_palabra(input);
@@ -244,8 +255,11 @@ bool jugada_usuario(sopa_t *j) {
 					marcar_acierto(j, p);
 					j->n_aciertos++;
 				}
-				else
-					printf("No has acertado.");
+				else {
+					COLOR_FG_ROJO();
+					printf("No has acertado.\n");
+					COLOR_DEFAULT();
+				}
 			}
 			free(intento);
 		}
@@ -254,6 +268,7 @@ bool jugada_usuario(sopa_t *j) {
 }
 
 void leer_string(char *s) {
+	/* Leer como maximo MAX_PALABRA caracteres */
 	scanf("%" TOSTR(MAX_PALABRA) "s", s);
 	limpiar_stdin();
 	return;
@@ -327,6 +342,7 @@ void eliminar_palabra_lista(sopa_t *j, palabra_t *p) {
 		j->pal_0 = p->sig;
 	else
 		p->ant->sig = p->sig;
+
 	free(p);
 	return;
 }
@@ -360,12 +376,10 @@ void mostrar_sopa(sopa_t *j) {
 	for (i = 10; i < j->dim + 1; i+=10) {
 		printf("                   %d", i/10);
 	}
-
 	/* Unidades */
 	printf("\n  ");   
 	for (i = 0; i < j->dim; i++)
 		printf(" %d", (i + 1) % 10);
-
 	printf("\n");
 	COLOR_DEFAULT();
 
@@ -374,10 +388,12 @@ void mostrar_sopa(sopa_t *j) {
 	/* Si esta encertada, se marca */
 	for (i = 0; i < j->dim ; i++)
 	{
+		/* Mostrar numero de linia */
 		COLOR_FG_ROJO();
-		printf("%-2d", i + 1);	/* Mostrar numero de linia */
+		printf("%-2d", i + 1);
 		COLOR_DEFAULT();
 
+		/* Mostrar letras */
 		for (k = 0; k < j->dim; k++) {
 			if (j->aciertos[i * j->dim + k])
 				COLOR_BG_VERDE();
