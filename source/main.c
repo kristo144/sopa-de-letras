@@ -9,15 +9,12 @@ int main (int argc, char *argv[]) {
 	palabra_t *pal_0;
 	bool juego_finalizado, rendido;
 	int n, dim;
-	time_t seed;
 
 	if (argc < 2) {
 		printf("Pon el fichero con palabras como primer parametro.\n");
 	}
 	else {
-		seed = time(NULL);
-		srand(seed);
-		printf("seed: %ld\n", seed);
+		srand(time(NULL));
 
 		escribir_mensaje_bienvenida();
 		pal_0 = leer_palabras(argv[1], &n);
