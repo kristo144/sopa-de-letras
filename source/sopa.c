@@ -270,8 +270,10 @@ bool jugada_usuario(sopa_t *j) {
 }
 
 void leer_string(char *s) {
-	/* Leer como maximo MAX_PALABRA caracteres */
-	scanf("%" TOSTR(MAX_PALABRA) "s", s);
+	/* Leer como maximo MAX_PALABRA + 1 caracteres */
+	char t[16];
+	sprintf(t, "%%%ds", MAX_PALABRA + 1);
+	scanf(t, s);
 	limpiar_stdin();
 	return;
 }
